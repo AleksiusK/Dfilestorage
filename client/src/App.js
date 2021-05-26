@@ -1,6 +1,11 @@
 import React, { Component } from "react";
 import SolidityDrive from "./contracts/SolidityDrive.json";
 import getWeb3 from "./getWeb3";
+import{StyledDropZone} from 'react-drop-zone';
+import {FileIcon, defaultStyles} from 'react-file-icon';
+import {Table} from 'reactstrap';
+import "react-drop-zone/dist/styles.css";
+import "bootstrap/dist/css/bootstrap.css"
 
 import "./App.css";
 
@@ -49,7 +54,27 @@ class App extends Component {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
     return(
-      null
+      <div className="App">
+        <div className="container pt-5">
+        <StyledDropZone/>
+        <Table>
+          <thead>
+            <tr>
+              <th width="7%" scope="row">Type</th>
+              <th className="text-left">File Name</th>
+              <th className="text-right">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th><FileIcon extension="docx"{...defaultStyles.docx}/></th>
+              <th className="text-left">File name.docx</th>
+              <th className="text-right">2001</th>
+            </tr>
+          </tbody>
+        </Table>
+        </div>
+      </div>
     );
   }
 }
