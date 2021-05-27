@@ -30,7 +30,7 @@ class App extends Component {
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance }, this.runExample);
+      this.setState({ web3, accounts, contract: instance }, this.getFiles);
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -41,7 +41,14 @@ class App extends Component {
   };
 
   getFiles = async () => {
-    //TODO
+    const { account, contract } = this.state;
+    let filesLenght = await contract.methods.filesLenght().call({from: account[0]});
+    let files = [];
+    for(let i=0;i<filesLenght;i++) {
+      let file = await contract.method.getFiles(i).call({ from: account[0]});
+      files.push(file);
+    }
+    this.setState({SolidityDrive: files });
   }
 
   onDrop= async () => {
@@ -60,7 +67,7 @@ class App extends Component {
         <Table>
           <thead>
             <tr>
-              <th width="7%" scope="row">Type</th>
+              <th width="5%" scope="row">Type</th>
               <th className="text-left">File Name</th>
               <th className="text-right">Date</th>
             </tr>
