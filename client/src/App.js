@@ -6,8 +6,11 @@ import {FileIcon, defaultStyles} from 'react-file-icon';
 import {Table} from 'reactstrap';
 import "react-drop-zone/dist/styles.css";
 import "bootstrap/dist/css/bootstrap.css"
-
+import ipfs from './ipfs';
 import "./App.css";
+
+const filereader =  require('pull-file-reader');
+
 
 class App extends Component {
   state = { SolidityDrive: [], web3: null, accounts: null, contract: null };
@@ -30,7 +33,7 @@ class App extends Component {
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance }, this.getFiles);
+      this.setState({ web3, accounts, contract: instance }, this.getFile);
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -41,18 +44,29 @@ class App extends Component {
   };
 
   getFiles = async () => {
-    const { account, contract } = this.state;
-    let filesLenght = await contract.methods.filesLenght().call({from: account[0]});
-    let files = [];
-    for(let i=0;i<filesLenght;i++) {
-      let file = await contract.method.getFiles(i).call({ from: account[0]});
-      files.push(file);
+    try {
+        const { account, contract } = this.state;
+      let filesLenght = await contract.methods.getLenght().call({from: account[0]});
+      let files = [];
+      for(let i=0;i<filesLenght;i++) {
+        let file = await contract.methods.getFile(i).call({ from: account[0]});
+        files.push(file);
+      }
+      this.setState({SolidityDrive: files });
+    } catch (error) {
+      console.log(error);
     }
-    this.setState({SolidityDrive: files });
+    
   }
 
-  onDrop= async () => {
-    //TODO
+  onDrop = async (file) => {
+    try {
+      const {contract, accounts} = this.state;
+      const stream = filereader(file);
+      const result = await ipfs.add(stream);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
 
@@ -63,7 +77,7 @@ class App extends Component {
     return(
       <div className="App">
         <div className="container pt-5">
-        <StyledDropZone/>
+        <StyledDropZone onDrop={this.onDrop}/>
         <Table>
           <thead>
             <tr>
