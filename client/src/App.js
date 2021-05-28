@@ -8,6 +8,7 @@ import "react-drop-zone/dist/styles.css";
 import "bootstrap/dist/css/bootstrap.css"
 import ipfs from './ipfs';
 import "./App.css";
+import Moment from "react-moment";
 
 const filereader =  require('pull-file-reader');
 
@@ -33,7 +34,7 @@ class App extends Component {
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance }, this.getFile);
+      this.setState({ web3, accounts, contract: instance }, this.getFiles);
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -45,11 +46,11 @@ class App extends Component {
 
   getFiles = async () => {
     try {
-        const { account, contract } = this.state;
-      let filesLenght = await contract.methods.getLenght().call({from: account[0]});
+      const { accounts, contract } = this.state;
+      let filesLenght = await contract.methods.getLenght().call({from: accounts[0]});
       let files = [];
       for(let i=0;i<filesLenght;i++) {
-        let file = await contract.methods.getFile(i).call({ from: account[0]});
+        let file = await contract.methods.getFile(i).call({ from: accounts[0]});
         files.push(file);
       }
       this.setState({SolidityDrive: files });
@@ -64,6 +65,13 @@ class App extends Component {
       const {contract, accounts} = this.state;
       const stream = filereader(file);
       const result = await ipfs.add(stream);
+      const timestamp = Math.round(+new Date() / 1000);
+      const type = file.name.substr(file.name.lastIndexOf(".")+1);
+      
+      let uploaded = await contract.methods.add(result[0].hash, file.name, type, timestamp).send({from: accounts[0], gas: 300000});
+      console.log(uploaded);
+
+      this.getFiles();
     } catch (error) {
       console.log(error);
     }
@@ -71,6 +79,7 @@ class App extends Component {
 
 
   render() {
+    const {SolidityDrive} = this.state;
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -87,11 +96,20 @@ class App extends Component {
             </tr>
           </thead>
           <tbody>
+            {SolidityDrive !== [] ? SolidityDrive.map((item, key) => (
             <tr>
-              <th><FileIcon extension="docx"{...defaultStyles.docx}/></th>
-              <th className="text-left">File name.docx</th>
-              <th className="text-right">2001</th>
+            <th>
+              <FileIcon 
+                extension={item[2]}
+                {...defaultStyles[item[2]]}
+                />
+              </th>
+              <th className="text-left"><a href={"https://ipfs.io/ipfs/"+item[0]}>{item[1]}</a></th>
+              <th className="text-right">
+                <Moment format="YYYY/MM/DD" unix>{item[3]}</Moment>
+              </th>
             </tr>
+            )) : null }
           </tbody>
         </Table>
         </div>
