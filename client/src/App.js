@@ -15,8 +15,8 @@ const filereader =  require('pull-file-reader');
 
 class App extends Component {
   state = { SolidityDrive: [], web3: null, accounts: null, contract: null };
-
   componentDidMount = async () => {
+    const ethereum = window.ethereum;
     try {
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
@@ -35,6 +35,11 @@ class App extends Component {
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
       this.setState({ web3, accounts, contract: instance }, this.getFiles);
+      ethereum.on('accountsChanged', async () => {
+        const changedAcc = await web3.eth.getAccounts();
+        this.setState({accounts: changedAcc});
+        this.getFiles();
+      })
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -43,7 +48,7 @@ class App extends Component {
       console.error(error);
     }
   };
-
+  
   getFiles = async () => {
     try {
       const { accounts, contract } = this.state;
