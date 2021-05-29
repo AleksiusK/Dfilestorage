@@ -1,2 +1,2 @@
 # Dfilestorage
-A decentralized file storage system
+A decentralized file storage system using IPFS
